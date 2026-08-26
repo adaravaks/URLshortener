@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/adaravaks/URLshortener/internal/handler"
+	"github.com/adaravaks/URLshortener/internal/repository"
 	_ "github.com/lib/pq"
 )
 
@@ -27,13 +29,20 @@ func main() {
 	}
 	log.Println("connected to db successfully")
 
+	repo := repository.NewPostgresLinkRepository(db)
+	h := handler.NewHandler(repo)
+
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Health checked")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	})
+
+	mux.HandleFunc("POST /links", h.CreateLink)
+	mux.HandleFunc("GET /links/{code}/stats", h.Stats)
+	mux.HandleFunc("GET /{code}", h.Redirect)
 
 	log.Println("Server started on :8080")
 	err = http.ListenAndServe(":8080", mux)
