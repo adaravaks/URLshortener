@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/adaravaks/URLshortener/internal/handler"
 	"github.com/adaravaks/URLshortener/internal/repository"
@@ -11,7 +12,10 @@ import (
 )
 
 func main() {
-	dsn := "postgres://urlshortener:urlshortener@localhost:5433/urlshortener?sslmode=disable"
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		dsn = "postgres://urlshortener:urlshortener@localhost:5433/urlshortener?sslmode=disable"
+	}
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {

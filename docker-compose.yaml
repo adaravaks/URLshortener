@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: urlshortener
       POSTGRES_DB: urlshortener
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -16,6 +16,18 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  api:
+    build: .
+    container_name: urlshortener-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://urlshortener:urlshortener@postgres:5432/urlshortener?sslmode=disable
+    ports:
+      - "8080:8080"
 
 volumes:
   postgres_data:
