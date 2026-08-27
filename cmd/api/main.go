@@ -43,9 +43,10 @@ func main() {
 	mux.HandleFunc("POST /links", h.CreateLink)
 	mux.HandleFunc("GET /links/{code}/stats", h.Stats)
 	mux.HandleFunc("GET /{code}", h.Redirect)
+	wrapped := handler.LoggingMiddleware(handler.RecoveryMiddleware(mux))
 
 	log.Println("Server started on :8080")
-	err = http.ListenAndServe(":8080", mux)
+	err = http.ListenAndServe(":8080", wrapped)
 	if err != nil {
 		log.Fatal(err)
 	}
